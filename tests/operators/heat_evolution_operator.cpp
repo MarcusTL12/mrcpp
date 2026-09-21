@@ -39,7 +39,7 @@
 #include "treebuilders/multiply.h"
 #include "treebuilders/project.h"
 #include "trees/BandWidth.h"
-#include "operators/HeatOperator.h"
+#include "operators/HeatKernel.h"
 #include "functions/special_functions.h"
 #include "treebuilders/add.h"
 
@@ -65,7 +65,8 @@ TEST_CASE("Apply heat evolution operator", "[apply_heat_evolution], [heat_evolut
     auto MRA = mrcpp::MultiResolutionAnalysis<1>(world, basis, max_depth);
 
     // Time evolution operatror Exp(delta_t)
-    mrcpp::HeatOperator<1> H(MRA, delta_t, prec);
+    mrcpp::HeatKernel kernel(delta_t, 1);
+    mrcpp::ConvolutionOperator<1> H(MRA, kernel, prec);
 
     // Analytical solution parameters for psi(x, t)
     double sigma = 0.001;

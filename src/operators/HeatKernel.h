@@ -51,15 +51,35 @@ namespace mrcpp {
  * \f]
  *
  */
-template <int D> class HeatKernel final : public GaussExp<1> {
+class HeatKernel : public GaussExp<1> {
 public:
-    HeatKernel(double t)
+    HeatKernel(double t, int D)
             : GaussExp<1>() {
+        constant_coeff = -1.0;
+
         double expo = 0.25 / t;
         double coef = std::pow(expo / mrcpp::pi, D / 2.0);
         GaussFunc<1> gFunc(expo, coef);
         this->append(gFunc);
     }
+
+    HeatKernel(double t, std::vector<double> &coeffs, int D)
+            : GaussExp<1>() {
+        constant_coeff = coeffs[0];
+
+        for (size_t i = 1; i < coeffs.size(); i++) {
+            double exponent = 0.25 / (t * (i + 1));
+            double coeff = coeffs[i] * std::pow(exponent / mrcpp::pi, D / 2.0);
+
+            mrcpp::GaussFunc<1> g(exponent, coeff);
+
+            append(g);
+        }
+    }
+
+    double constant_coeff{0.0};
 };
+
+HeatKernel EDHeatKernel(double t, int order, int D);
 
 } // namespace mrcpp
