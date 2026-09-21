@@ -115,19 +115,19 @@ public:
         if (data.size() >= order && data[order - 1].size() > 0) { return data[order - 1][0]; }
 
         if (order == 1) {
-            if (data.size() == 0) { data.push_back(std::vector<Polynomial>()); }
+            if (data.size() == 0) { data.emplace_back(std::vector<Polynomial>()); }
 
             std::vector<double> coeffs{-1.0, 1.0};
 
-            data[0].push_back(Polynomial(coeffs));
+            data[0].emplace_back(Polynomial(coeffs));
 
             return data[0][0];
         } else if (order == 2) {
-            while (data.size() < 2) { data.push_back(std::vector<Polynomial>()); }
+            while (data.size() < 2) { data.emplace_back(std::vector<Polynomial>()); }
 
             std::vector<double> coeffs{-1.5, 2.0, -0.5};
 
-            data[1].push_back(Polynomial(coeffs));
+            data[1].emplace_back(Polynomial(coeffs));
 
             return data[1][0];
         }
@@ -149,9 +149,9 @@ public:
             new_coeffs += tmp;
         }
 
-        while (data.size() < order) { data.push_back(std::vector<Polynomial>()); }
+        while (data.size() < order) { data.emplace_back(std::vector<Polynomial>()); }
 
-        data[order - 1].push_back(new_coeffs);
+        data[order - 1].emplace_back(new_coeffs);
 
         return data[order - 1][0];
     }
@@ -161,9 +161,12 @@ public:
 
         if (data.size() >= order && data[order - 1].size() >= power) { return data[order - 1][power - 1]; }
 
-        Polynomial new_poly = get_coeffs(order, power - 1) * get_coeffs(order);
+        Polynomial &left = get_coeffs(order, power - 1);
+        Polynomial &right = get_coeffs(order);
 
-        data[order - 1].push_back(new_poly);
+        Polynomial new_poly = left * right;
+
+        data[order - 1].emplace_back(new_poly);
 
         return data[order - 1][power - 1];
     }
@@ -178,6 +181,8 @@ void HeatKernel::initEDHeatKernel(double t, int order, int D) {
     HeatKernelData data;
 
     Polynomial &coeffs = data.get_coeffs(order);
+
+    MSG_INFO(coeffs);
 
     initialize(t, coeffs.coeffs, D);
 }

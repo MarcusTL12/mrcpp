@@ -27,6 +27,8 @@
 
 #include "functions/GaussExp.h"
 #include "functions/GaussFunc.h"
+#include "utils/Printer.h"
+
 
 namespace mrcpp {
 
@@ -74,9 +76,13 @@ public:
     void initialize(double t, std::vector<double> &coeffs, int D) {
         constant_coeff = coeffs[0];
 
+        MSG_INFO("Constant: " << constant_coeff);
+
         for (size_t i = 1; i < coeffs.size(); i++) {
             double exponent = 0.25 / (t * i);
             double coeff = coeffs[i] * std::pow(exponent / mrcpp::pi, D / 2.0);
+
+            MSG_INFO("coeff " << i << ": " << coeffs[i]);
 
             mrcpp::GaussFunc<1> g(exponent, coeff);
 
