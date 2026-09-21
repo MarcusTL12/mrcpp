@@ -171,7 +171,7 @@ public:
     std::vector<std::vector<Polynomial>> data;
 };
 
-HeatKernel EDHeatKernel(double t, int order, int D) {
+void HeatKernel::initEDHeatKernel(double t, int order, int D) {
     // Assuming generating the coefficient data is cheap and that
     // we will not be constructing many such kernels. If this becomes
     // a problem, we can think about caching this data variable.
@@ -179,7 +179,7 @@ HeatKernel EDHeatKernel(double t, int order, int D) {
 
     Polynomial &coeffs = data.get_coeffs(order);
 
-    return mrcpp::HeatKernel(t, coeffs.coeffs, D);
+    initialize(t, coeffs.coeffs, D);
 }
 
 } // namespace mrcpp

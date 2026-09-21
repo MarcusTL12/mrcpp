@@ -38,7 +38,7 @@ static double harmonic_number(size_t n) {
     return acc;
 }
 
-HeatKernel LogHeatKernel(double t, int order, int D) {
+void HeatKernel::initLogHeatKernel(double t, int order, int D) {
     std::vector<double> coeffs;
 
     coeffs.push_back(-harmonic_number(order));
@@ -51,7 +51,7 @@ HeatKernel LogHeatKernel(double t, int order, int D) {
         coeffs.push_back(m % 2 == 0 ? -c : c);
     }
 
-    return mrcpp::HeatKernel(t, coeffs, D);
+    initialize(t, coeffs, D);
 }
 
 } // namespace mrcpp

@@ -53,6 +53,9 @@ namespace mrcpp {
  */
 class HeatKernel : public GaussExp<1> {
 public:
+    HeatKernel()
+            : GaussExp<1>() {}
+
     HeatKernel(double t, int D)
             : GaussExp<1>() {
         constant_coeff = -1.0;
@@ -65,10 +68,14 @@ public:
 
     HeatKernel(double t, std::vector<double> &coeffs, int D)
             : GaussExp<1>() {
+        initialize(t, coeffs, D);
+    }
+
+    void initialize(double t, std::vector<double> &coeffs, int D) {
         constant_coeff = coeffs[0];
 
         for (size_t i = 1; i < coeffs.size(); i++) {
-            double exponent = 0.25 / (t * (i + 1));
+            double exponent = 0.25 / (t * i);
             double coeff = coeffs[i] * std::pow(exponent / mrcpp::pi, D / 2.0);
 
             mrcpp::GaussFunc<1> g(exponent, coeff);
@@ -77,10 +84,19 @@ public:
         }
     }
 
+    HeatKernel(double t, int order, int D, std::string &type)
+            : GaussExp<1>() {
+        if (type == "log") {
+            initLogHeatKernel(t, order, 3);
+        } else if (type == "ed") {
+            initEDHeatKernel(t, order, 3);
+        }
+    }
+
+    void initEDHeatKernel(double t, int order, int D);
+    void initLogHeatKernel(double t, int order, int D);
+
     double constant_coeff{0.0};
 };
-
-HeatKernel EDHeatKernel(double t, int order, int D);
-HeatKernel LogHeatKernel(double t, int order, int D);
 
 } // namespace mrcpp
