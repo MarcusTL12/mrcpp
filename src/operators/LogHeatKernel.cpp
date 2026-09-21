@@ -45,7 +45,11 @@ HeatKernel LogHeatKernel(double t, int order, int D) {
 
     double binom = 1.0;
 
-    for (size_t m = 1; m <= order; m++) { binom *= static_cast<double>(order - m + 1) / static_cast<double>(m); }
+    for (size_t m = 1; m <= order; m++) {
+        binom *= static_cast<double>(order - m + 1) / static_cast<double>(m);
+        double c = binom / m;
+        coeffs.push_back(m % 2 == 0 ? -c : c);
+    }
 
     return mrcpp::HeatKernel(t, coeffs, D);
 }

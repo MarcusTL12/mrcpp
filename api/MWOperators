@@ -26,6 +26,7 @@
 #include "operators/PoissonKernel.h"
 #include "operators/IdentityKernel.h"
 #include "operators/HelmholtzKernel.h"
+#include "operators/HeatKernel.h"
 
 #include "operators/PoissonOperator.h"
 #include "operators/HelmholtzOperator.h"
