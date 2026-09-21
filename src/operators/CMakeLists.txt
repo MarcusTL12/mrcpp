@@ -6,6 +6,7 @@ target_sources(mrcpp
     ${CMAKE_CURRENT_SOURCE_DIR}/CartesianConvolution.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DerivativeConvolution.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/EDHeatKernel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/LogHeatKernel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/HelmholtzKernel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/HelmholtzOperator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/IdentityConvolution.cpp

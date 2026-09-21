@@ -81,5 +81,6 @@ public:
 };
 
 HeatKernel EDHeatKernel(double t, int order, int D);
+HeatKernel LogHeatKernel(double t, int order, int D);
 
 } // namespace mrcpp
