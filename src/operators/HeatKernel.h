@@ -93,9 +93,9 @@ public:
     HeatKernel(double t, int order, int D, std::string &type)
             : GaussExp<1>() {
         if (type == "log") {
-            initLogHeatKernel(t, order, 3);
+            initLogHeatKernel(t, order, D);
         } else if (type == "ed") {
-            initEDHeatKernel(t, order, 3);
+            initEDHeatKernel(t, order, D);
         }
     }
 
