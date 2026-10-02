@@ -79,7 +79,7 @@ TEST_CASE("Helmholtz' kernel", "[init_helmholtz], [helmholtz_operator], [mw_oper
             MultiResolutionAnalysis<1> kern_mra(kern_box, kern_basis);
 
             FunctionTreeVector<1> K;
-            for (int i = 0; i < helmholtz.size(); i++) {
+            for (size_t i = 0; i < helmholtz.size(); i++) {
                 Gaussian<1> &kern_gauss = *helmholtz[i];
                 auto *kern_tree = new FunctionTree<1>(kern_mra);
                 build_grid(*kern_tree, kern_gauss);

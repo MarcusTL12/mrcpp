@@ -43,7 +43,7 @@ TEST_CASE("NodeBox: Constructor", "[node_box_constructor], [node_box], [boxes]")
 
 template <int D> void testConstructors() {
     std::array<int, D> nb;
-    int tot_boxes = 1;
+    size_t tot_boxes = 1;
     for (int d = 0; d < D; d++) {
         nb[d] = D + d;
         tot_boxes *= nb[d];

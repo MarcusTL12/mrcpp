@@ -62,7 +62,7 @@ template <int D> void testClearGrid() {
         tree.clear();
         THEN("it represents an undefined function on the root grid") {
             REQUIRE(tree.getDepth() == 1);
-            REQUIRE(tree.getNNodes() == tree.getRootBox().size());
+            REQUIRE(tree.getNNodes() == static_cast<int>(tree.getRootBox().size()));
             REQUIRE(tree.integrate() == Catch::Approx(0.0));
             REQUIRE(tree.getSquareNorm() == Catch::Approx(-1.0));
             AND_WHEN("the function is re-projected") {

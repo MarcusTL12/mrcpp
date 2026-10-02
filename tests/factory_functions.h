@@ -99,7 +99,7 @@ template <int D> void testInitial(const mrcpp::BoundingBox<D> *box) {
         REQUIRE((box->getLowerBounds()[d] < box->getUpperBounds()[d]));
     }
 
-    int tot_boxes = 1;
+    size_t tot_boxes = 1;
     for (int d = 0; d < D; d++) {
         const int nb = d + 1;
         REQUIRE((box->size(d) == nb));

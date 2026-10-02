@@ -77,7 +77,7 @@ TEST_CASE("Initialize Poisson operator", "[init_poisson], [poisson_operator], [m
             MultiResolutionAnalysis<1> kern_mra(kern_box, kern_basis);
 
             FunctionTreeVector<1> kern_vec;
-            for (int i = 0; i < poisson.size(); i++) {
+            for (size_t i = 0; i < poisson.size(); i++) {
                 Gaussian<1> &kern_gauss = *poisson[i];
                 auto *kern_tree = new FunctionTree<1>(kern_mra);
                 build_grid(*kern_tree, kern_gauss);
