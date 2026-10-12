@@ -28,10 +28,10 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "function_utils.h"
 #include "GaussFunc.h"
 #include "GaussPoly.h"
 #include "Gaussian.h"
+#include "function_utils.h"
 #include "utils/Printer.h"
 #include "utils/math_utils.h"
 
@@ -45,7 +45,9 @@ template <int D> GaussExp<D>::GaussExp(int nTerms) {
     for (int i = 0; i < nTerms; i++) { this->funcs.push_back(nullptr); }
 }
 
-template <int D> GaussExp<D>::GaussExp(const GaussExp<D> &gexp) : RepresentableFunction<D, double>(gexp) {
+template <int D>
+GaussExp<D>::GaussExp(const GaussExp<D> &gexp)
+        : RepresentableFunction<D, double>(gexp) {
     screening = gexp.screening;
     for (size_t i = 0; i < gexp.size(); i++) {
         Gaussian<D> *gauss = gexp.funcs[i]->copy();
@@ -369,6 +371,14 @@ template <int D> GaussExp<D> GaussExp<D>::periodify(const std::array<double, D> 
         out_exp.append(periodic_gauss);
     }
     return out_exp;
+}
+
+template <int D> void GaussExp<D>::screenSmallGaussians(double coeff_threshold) {
+    for (size_t i = funcs.size(); i > 0; i--) {
+        size_t j = i - 1;
+
+        if (std::abs(funcs[j]->coef) < coeff_threshold) { funcs.erase(funcs.begin() + j); }
+    }
 }
 
 template class GaussExp<1>;

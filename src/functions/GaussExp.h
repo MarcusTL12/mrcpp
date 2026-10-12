@@ -112,6 +112,8 @@ public:
     void setPow(int i, const std::array<int, D> &power) { this->funcs[i]->setPow(power); }
     void setPos(int i, const std::array<double, D> &pos) { this->funcs[i]->setPos(pos); }
 
+    void screenSmallGaussians(double coeff_threshold);
+
     /** @brief Append Gaussian to expansion */
     void append(const Gaussian<D> &g);
     /** @brief Append GaussExp to expansion */
