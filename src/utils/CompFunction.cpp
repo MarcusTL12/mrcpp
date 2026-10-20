@@ -516,11 +516,11 @@ template <int D> void CompFunction<D>::restoreFromScratch() {
     for (int i = 0; i < Ncomp(); i++) {
         std::stringstream fname;
         fname << "scratch/" << name << "_comp_" << i;
-        if (isreal()) {
+        if (isreal() and CompD[i] == nullptr) {
             CompD[i] = new FunctionTree<D, double>(*defaultCompMRA<D>, func_ptr->shared_mem_real);
             CompD[i]->loadTree(fname.str());
         }
-        if (iscomplex()) {
+        if (iscomplex() and CompC[i] == nullptr) {
             CompC[i] = new FunctionTree<D, ComplexDouble>(*defaultCompMRA<D>, func_ptr->shared_mem_cplx);
             CompC[i]->loadTree(fname.str());
         }
