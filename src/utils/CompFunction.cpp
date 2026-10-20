@@ -293,6 +293,7 @@ template <int D> void CompFunction<D>::alloc_comp(int ialloc) {
 }
 
 template <int D> void CompFunction<D>::free() {
+    clearScratch();
     for (int i = 0; i < Ncomp(); i++) {
         if (CompD[i] != nullptr) delete CompD[i];
         if (CompC[i] != nullptr) delete CompC[i];
@@ -480,7 +481,62 @@ template <int D> void CompFunction<D>::upgradeToComplex(){
     func_ptr->iscomplex = 1;
     func_ptr->isreal = 0;
 }
-    
+
+template <int D> void CompFunction<D>::offloadToScratch() {
+    if (name.empty()) MSG_ABORT("CompFunction must have name set before offloading to scratch!");
+
+    if (numComponentsInScratch != Ncomp()) {
+        // Must write to file before freeing
+        numComponentsInScratch = Ncomp();
+
+        for (int i = 0; i < Ncomp(); i++) {
+            std::stringstream fname;
+            fname << "scratch/" << name << "_comp_" << i;
+            if (isreal()) {
+                CompD[i]->saveTree(fname.str());
+            }
+            if (iscomplex()) {
+                CompC[i]->saveTree(fname.str());
+            }
+        }
+    }
+
+    // Free trees
+    for (int i = 0; i < Ncomp(); i++) {
+        if (CompD[i] != nullptr) delete CompD[i];
+        if (CompC[i] != nullptr) delete CompC[i];
+        CompD[i] = nullptr;
+        CompC[i] = nullptr;
+    }
+}
+
+template <int D> void CompFunction<D>::restoreFromScratch() {
+    if (numComponentsInScratch != Ncomp()) MSG_ABORT("Attempting to restore CompFunction from scratch, but no scratch has not been written!");
+
+    for (int i = 0; i < Ncomp(); i++) {
+        std::stringstream fname;
+        fname << "scratch/" << name << "_comp_" << i;
+        if (isreal()) {
+            CompD[i] = new FunctionTree<D, double>(*defaultCompMRA<D>, func_ptr->shared_mem_real);
+            CompD[i]->loadTree(fname.str());
+        }
+        if (iscomplex()) {
+            CompC[i] = new FunctionTree<D, ComplexDouble>(*defaultCompMRA<D>, func_ptr->shared_mem_cplx);
+            CompC[i]->loadTree(fname.str());
+        }
+    }
+}
+
+template <int D> void CompFunction<D>::clearScratch() {
+    for (int i = 0; i < numComponentsInScratch; i++) {
+        std::stringstream fname;
+        fname << "scratch/" << name << "_comp_" << i << ".tree";
+        std::remove(fname.str().c_str());
+    }
+
+    numComponentsInScratch = 0;
+}
+
 template <int D> int CompFunction<D>::crop(double prec, bool absPrec) {
     if (prec < 0.0) return 0;
     int nChunksremoved = 0;
@@ -965,6 +1021,28 @@ CompFunctionVector::CompFunctionVector(int N)
 }
 void CompFunctionVector::distribute() {
     for (size_t i = 0; i < this->size(); i++) (*this)[i].func_ptr->rank = i;
+}
+
+void CompFunctionVector::setName(const std::string &basename) {
+        for (size_t i = 0; i < size(); i++) {
+            if (mpi::my_func(i)) {
+                std::stringstream name;
+                name << basename << "_idx_" << i;
+                CompFunctionVector::operator[](i).name = name.str();
+            }
+        }
+    }
+
+void CompFunctionVector::offloadToScratch() {
+    for (size_t i = 0; i < size(); i++) {
+        if (mpi::my_func(i)) CompFunctionVector::operator[](i).offloadToScratch();
+    }
+}
+
+void CompFunctionVector::restoreFromScratch() {
+    for (size_t i = 0; i < size(); i++) {
+        if (mpi::my_func(i)) CompFunctionVector::operator[](i).restoreFromScratch();
+    }
 }
 
 /** @brief Make a linear combination of functions

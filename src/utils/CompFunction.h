@@ -126,12 +126,13 @@ public:
     CompFunction(const CompFunction<D> &compfunc);
     CompFunction(CompFunction<D> &&compfunc);
     CompFunction<D> &operator=(const CompFunction<D> &compfunc);
-    virtual ~CompFunction() = default;
+    virtual ~CompFunction() { clearScratch(); };
 
     FunctionTree<D, double> **CompD;        //  = func_ptr->real so that we can use name CompD instead of func_ptr.real
     FunctionTree<D, ComplexDouble> **CompC; // = func_ptr->cplx
 
-    std::string name;
+    std::string name; // Used to store data in scratch
+    int numComponentsInScratch{0}; // Used to determine how many components to load when restoring from scratch
 
     // additional data that describe each component (defined by user):
     CompFunctionData<D> data() const { return func_ptr->data; }
@@ -194,6 +195,10 @@ public:
     const FunctionTree<D, double> &imag(int i = 0) const; // does not make sense now
     std::shared_ptr<mrcpp::TreePtr<D>> func_ptr;
     void upgradeToComplex();
+
+    void offloadToScratch();
+    void restoreFromScratch();
+    void clearScratch();
 };
 
 template <int D> void CopyToComplex(CompFunction<D> &out, const CompFunction<D> &inp);
@@ -240,6 +245,10 @@ public:
     CompFunctionVector(int N = 0);
     MultiResolutionAnalysis<3> *vecMRA;
     void distribute();
+
+    void setName(const std::string &basename);
+    void offloadToScratch();
+    void restoreFromScratch();
 };
 
 void rotate(CompFunctionVector &Phi, const ComplexMatrix &U, double prec = -1.0);
