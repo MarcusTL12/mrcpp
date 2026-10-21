@@ -513,18 +513,22 @@ template <int D> void CompFunction<D>::offloadToScratch(bool overwrite, bool loc
 }
 
 template <int D> void CompFunction<D>::restoreFromScratch(bool overwrite) {
-    if (numComponentsInScratch != Ncomp()) MSG_ABORT("Attempting to restore CompFunction from scratch, but no scratch has not been written!");
+    bool hasScratch = numComponentsInScratch == Ncomp();
+
+    if (not hasScratch and overwrite) MSG_ABORT("Attempting to restore CompFunction from scratch, but no scratch has not been written!");
 
     for (int i = 0; i < Ncomp(); i++) {
         std::stringstream fname;
         fname << getScratchDir(scratchIsLocal) << name << "_comp_" << i;
         if (isreal()) {
             bool hasData = CompD[i] != nullptr;
+            if (not hasScratch and not hasData) MSG_ABORT("Attempting to restore CompFunction from scratch, but no scratch has not been written!");
             if (not hasData) CompD[i] = new FunctionTree<D, double>(*defaultCompMRA<D>, func_ptr->shared_mem_real);
             if (not hasData or overwrite) CompD[i]->loadTree(fname.str());
         }
         if (iscomplex()) {
             bool hasData = CompC[i] != nullptr;
+            if (not hasScratch and not hasData) MSG_ABORT("Attempting to restore CompFunction from scratch, but no scratch has not been written!");
             if (not hasData)CompC[i] = new FunctionTree<D, ComplexDouble>(*defaultCompMRA<D>, func_ptr->shared_mem_cplx);
             if (not hasData or overwrite)CompC[i]->loadTree(fname.str());
         }
@@ -1047,9 +1051,9 @@ void CompFunctionVector::setName(const std::string &basename) {
         }
     }
 
-void CompFunctionVector::offloadToScratch(bool overwrite) {
+void CompFunctionVector::offloadToScratch(bool overwrite, bool local) {
     for (size_t i = 0; i < size(); i++) {
-        if (mpi::my_func(i)) CompFunctionVector::operator[](i).offloadToScratch(overwrite);
+        if (mpi::my_func(i)) CompFunctionVector::operator[](i).offloadToScratch(overwrite, local);
     }
 }
 

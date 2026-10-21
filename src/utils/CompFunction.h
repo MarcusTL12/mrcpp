@@ -259,7 +259,7 @@ public:
     void distribute();
 
     void setName(const std::string &basename);
-    void offloadToScratch(bool overwrite = false);
+    void offloadToScratch(bool overwrite = false, bool local = false);
     void restoreFromScratch(bool overwrite = false);
 };
 
