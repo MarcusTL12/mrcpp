@@ -196,8 +196,8 @@ public:
     std::shared_ptr<mrcpp::TreePtr<D>> func_ptr;
     void upgradeToComplex();
 
-    void offloadToScratch();
-    void restoreFromScratch();
+    void offloadToScratch(bool overwrite = false);
+    void restoreFromScratch(bool overwrite = false);
     void clearScratch();
 };
 
@@ -247,8 +247,8 @@ public:
     void distribute();
 
     void setName(const std::string &basename);
-    void offloadToScratch();
-    void restoreFromScratch();
+    void offloadToScratch(bool overwrite = false);
+    void restoreFromScratch(bool overwrite = false);
 };
 
 void rotate(CompFunctionVector &Phi, const ComplexMatrix &U, double prec = -1.0);

@@ -482,10 +482,10 @@ template <int D> void CompFunction<D>::upgradeToComplex(){
     func_ptr->isreal = 0;
 }
 
-template <int D> void CompFunction<D>::offloadToScratch() {
+template <int D> void CompFunction<D>::offloadToScratch(bool overwrite) {
     if (name.empty()) MSG_ABORT("CompFunction must have name set before offloading to scratch!");
 
-    if (numComponentsInScratch != Ncomp()) {
+    if (overwrite or numComponentsInScratch != Ncomp()) {
         // Must write to file before freeing
         numComponentsInScratch = Ncomp();
 
@@ -510,19 +510,21 @@ template <int D> void CompFunction<D>::offloadToScratch() {
     }
 }
 
-template <int D> void CompFunction<D>::restoreFromScratch() {
+template <int D> void CompFunction<D>::restoreFromScratch(bool overwrite) {
     if (numComponentsInScratch != Ncomp()) MSG_ABORT("Attempting to restore CompFunction from scratch, but no scratch has not been written!");
 
     for (int i = 0; i < Ncomp(); i++) {
         std::stringstream fname;
         fname << "scratch/" << name << "_comp_" << i;
-        if (isreal() and CompD[i] == nullptr) {
-            CompD[i] = new FunctionTree<D, double>(*defaultCompMRA<D>, func_ptr->shared_mem_real);
-            CompD[i]->loadTree(fname.str());
+        if (isreal()) {
+            bool hasData = CompD[i] != nullptr;
+            if (not hasData) CompD[i] = new FunctionTree<D, double>(*defaultCompMRA<D>, func_ptr->shared_mem_real);
+            if (not hasData or overwrite) CompD[i]->loadTree(fname.str());
         }
-        if (iscomplex() and CompC[i] == nullptr) {
-            CompC[i] = new FunctionTree<D, ComplexDouble>(*defaultCompMRA<D>, func_ptr->shared_mem_cplx);
-            CompC[i]->loadTree(fname.str());
+        if (iscomplex()) {
+            bool hasData = CompC[i] != nullptr;
+            if (not hasData)CompC[i] = new FunctionTree<D, ComplexDouble>(*defaultCompMRA<D>, func_ptr->shared_mem_cplx);
+            if (not hasData or overwrite)CompC[i]->loadTree(fname.str());
         }
     }
 }
@@ -1033,15 +1035,15 @@ void CompFunctionVector::setName(const std::string &basename) {
         }
     }
 
-void CompFunctionVector::offloadToScratch() {
+void CompFunctionVector::offloadToScratch(bool overwrite) {
     for (size_t i = 0; i < size(); i++) {
-        if (mpi::my_func(i)) CompFunctionVector::operator[](i).offloadToScratch();
+        if (mpi::my_func(i)) CompFunctionVector::operator[](i).offloadToScratch(overwrite);
     }
 }
 
-void CompFunctionVector::restoreFromScratch() {
+void CompFunctionVector::restoreFromScratch(bool overwrite) {
     for (size_t i = 0; i < size(); i++) {
-        if (mpi::my_func(i)) CompFunctionVector::operator[](i).restoreFromScratch();
+        if (mpi::my_func(i)) CompFunctionVector::operator[](i).restoreFromScratch(overwrite);
     }
 }
 
