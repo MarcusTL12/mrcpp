@@ -482,8 +482,10 @@ template <int D> void CompFunction<D>::upgradeToComplex(){
     func_ptr->isreal = 0;
 }
 
-template <int D> void CompFunction<D>::offloadToScratch(bool overwrite) {
+template <int D> void CompFunction<D>::offloadToScratch(bool overwrite, bool local) {
     if (name.empty()) MSG_ABORT("CompFunction must have name set before offloading to scratch!");
+
+    scratchIsLocal = local;
 
     if (overwrite or numComponentsInScratch != Ncomp()) {
         // Must write to file before freeing
@@ -491,7 +493,7 @@ template <int D> void CompFunction<D>::offloadToScratch(bool overwrite) {
 
         for (int i = 0; i < Ncomp(); i++) {
             std::stringstream fname;
-            fname << "scratch/" << name << "_comp_" << i;
+            fname << getScratchDir(local) << name << "_comp_" << i;
             if (isreal()) {
                 CompD[i]->saveTree(fname.str());
             }
@@ -515,7 +517,7 @@ template <int D> void CompFunction<D>::restoreFromScratch(bool overwrite) {
 
     for (int i = 0; i < Ncomp(); i++) {
         std::stringstream fname;
-        fname << "scratch/" << name << "_comp_" << i;
+        fname << getScratchDir(scratchIsLocal) << name << "_comp_" << i;
         if (isreal()) {
             bool hasData = CompD[i] != nullptr;
             if (not hasData) CompD[i] = new FunctionTree<D, double>(*defaultCompMRA<D>, func_ptr->shared_mem_real);
@@ -532,11 +534,21 @@ template <int D> void CompFunction<D>::restoreFromScratch(bool overwrite) {
 template <int D> void CompFunction<D>::clearScratch() {
     for (int i = 0; i < numComponentsInScratch; i++) {
         std::stringstream fname;
-        fname << "scratch/" << name << "_comp_" << i << ".tree";
+        fname << getScratchDir(scratchIsLocal) << name << "_comp_" << i << ".tree";
         std::remove(fname.str().c_str());
     }
 
     numComponentsInScratch = 0;
+}
+
+template <int D> const std::string &CompFunction<D>::getScratchDir(bool local) {
+    if (local) {
+        if (localScratchDir.empty()) MSG_ABORT("Local scratch dir not set!");
+        return localScratchDir;
+    } else {
+        if (scratchDir.empty()) MSG_ABORT("Shared scratch dir not set!");
+        return scratchDir;
+    }
 }
 
 template <int D> int CompFunction<D>::crop(double prec, bool absPrec) {

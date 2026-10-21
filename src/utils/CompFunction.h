@@ -132,6 +132,7 @@ public:
     FunctionTree<D, ComplexDouble> **CompC; // = func_ptr->cplx
 
     std::string name; // Used to store data in scratch
+    bool scratchIsLocal{false};
     int numComponentsInScratch{0}; // Used to determine how many components to load when restoring from scratch
 
     // additional data that describe each component (defined by user):
@@ -196,10 +197,21 @@ public:
     std::shared_ptr<mrcpp::TreePtr<D>> func_ptr;
     void upgradeToComplex();
 
-    void offloadToScratch(bool overwrite = false);
+    void offloadToScratch(bool overwrite = false, bool local = false);
     void restoreFromScratch(bool overwrite = false);
     void clearScratch();
+
+    static const std::string &getScratchDir(bool local);
+    static void setSharedScratchDir(const std::string &dir) { scratchDir = dir; }
+    static void setLocalScratchDir(const std::string &dir) { localScratchDir = dir; }
+
+private:
+    static std::string scratchDir;
+    static std::string localScratchDir;
 };
+
+template<int D> std::string CompFunction<D>::scratchDir;
+template<int D> std::string CompFunction<D>::localScratchDir;
 
 template <int D> void CopyToComplex(CompFunction<D> &out, const CompFunction<D> &inp);
 template <int D> void deep_copy(CompFunction<D> *out, const CompFunction<D> &inp);
